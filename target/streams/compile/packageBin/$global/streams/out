@@ -1,0 +1,15 @@
+[0m[[0m[0minfo[0m] [0m[0mPackaging /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/provider_2.12-0.1.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	WebServer$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/WebServer$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	WebServer.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/WebServer.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	StatusRoutes$Status.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/StatusRoutes$Status.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	StatusRoutes.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/StatusRoutes.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	WebServer$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/WebServer$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	StatusRoutes$Status$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/cosimoranieri/IdeaProjects/provider/target/scala-2.12/classes/StatusRoutes$Status$.class[0m
+[0m[[0m[0minfo[0m] [0m[0mDone packaging.[0m
