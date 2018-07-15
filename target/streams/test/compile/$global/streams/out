@@ -1,4 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/cosimoranieri/IdeaProjects/provider/src/test/scala/StatusRoutesSpec.scala:15:68: class WordSpec needs to be a trait to be mixed in[0m
-[0m[[0m[31merror[0m] [0m[0mclass StatusRoutesSpec extends TestKit(ActorSystem("MySpec")) with WordSpec with Matchers with ScalaFutures with ScalatestRouteTest{[0m
-[0m[[0m[31merror[0m] [0m[0m                                                                   ^[0m
+[0m[[0m[31merror[0m] [0m[0m/Users/cosimoranieri/IdeaProjects/provider/src/test/scala/StatusRoutesSpec.scala:22:22: could not find implicit value for parameter ta: StatusRoutesSpec.this.TildeArrow[akka.http.scaladsl.server.RequestContext,scala.concurrent.Future[akka.http.scaladsl.server.RouteResult]][0m
+[0m[[0m[31merror[0m] [0m[0m      Get("/status") ~> statusRoutes ~> check {[0m
+[0m[[0m[31merror[0m] [0m[0m                     ^[0m
 [0m[[0m[31merror[0m] [0m[0mone error found[0m
