@@ -1,6 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/cosimoranieri/IdeaProjects/provider/src/main/scala/StatusRoutes.scala:23:51: Cannot find an implicit ExecutionContext. You might pass[0m
-[0m[[0m[31merror[0m] [0m[0man (implicit ec: ExecutionContext) parameter to your method[0m
-[0m[[0m[31merror[0m] [0m[0mor import scala.concurrent.ExecutionContext.Implicits.global.[0m
-[0m[[0m[31merror[0m] [0m[0m        val statusFuture: Future[Status] = Future { Status("ok") }[0m
-[0m[[0m[31merror[0m] [0m[0m                                                  ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
