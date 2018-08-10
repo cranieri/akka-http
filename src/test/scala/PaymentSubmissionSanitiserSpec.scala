@@ -3,9 +3,10 @@ import test._
 import org.scalatest.Inside
 
 import scala.util.Success
+import org.scalatest.TryValues._
 
 
-class PaymentSubmissionSanitiser extends WordSpec with Matchers with Inside {
+class PaymentSubmissionSanitiserSpec extends WordSpec with Matchers with Inside {
 
   "sanitise" should {
     "returns a validated payment if the payment is valid" in {
@@ -23,10 +24,11 @@ class PaymentSubmissionSanitiser extends WordSpec with Matchers with Inside {
     "returns an error if the payment is not sanitiser" in {
       val validPaymentSubmission = ValidatedPaymentSubmission(900, "ref1", Valid)
       val payment = PaymentSubmissionSanitiser.sanitise(validPaymentSubmission)
-
-      inside(payment) { case message =>
-        message should be ("invalid payment submission")
-      }
+      payment.isFailure should be (true)
+      payment.failure.exception.getMessage should be ("not sanitised payment submission")
+//      inside(payment) { case message =>
+//        message should be ("invalid payment submission")
+//      }
     }
   }
 }
