@@ -1,6 +1,4 @@
-package test
-
-import test._
+package com.model
 
 sealed trait PaymentSubmission {
   def amount: Int
