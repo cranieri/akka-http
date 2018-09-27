@@ -1,16 +1,21 @@
 package com
 
-import com.model.{UnvalidatedPaymentSubmission, Valid, ValidatedPaymentSubmission}
+import java.time.LocalDateTime
 
-import scala.util.{Failure, Success, Try}
+import com.model._
+import com.model.cycles._
 
 trait PaymentSubmissionValidator {
 
-  def validate(paymentSubmission: UnvalidatedPaymentSubmission): Try[ValidatedPaymentSubmission[Valid.type]] = {
-    if (paymentSubmission.amount < 1000)
-      Success(ValidatedPaymentSubmission(paymentSubmission.amount, paymentSubmission.reference, Valid))
-    else
-      Failure(new Exception("invalid payment submission"))
+  val amountLimit = 1000
+
+  def validate(paymentSubmission: PaymentSubmission): CycleResponseType[InvalidPaymentSubmission, ValidPaymentSubmission] = {
+    if (paymentSubmission.amount < amountLimit)
+      Right(ValidPaymentSubmission(paymentSubmission))
+    else {
+      val value = PaymentSubmissionValue(paymentSubmission.amount, paymentSubmission.reference, Some(LocalDateTime.now()))
+      Left(InvalidPaymentSubmission(value))
+    }
   }
 }
 

@@ -1,35 +1,32 @@
 package com
 
-import org.scalatest.TryValues._
+import com.model._
+import com.model.cycles._
 import org.scalatest.{Inside, Matchers, WordSpec}
-import com.model.{Sanitised, SanitisedPaymentSubmission, Valid, ValidatedPaymentSubmission}
-
-import scala.util.Success
-
 
 class PaymentSubmissionSanitiserSpec extends WordSpec with Matchers with Inside with PaymentSubmissionSanitiser {
 
   "sanitise" should {
+    val validData = PaymentSubmissionValue(900, "ref")
+    val invalidData = validData.copy(reference = "ref1")
+
     "returns a validated payment if the payment is valid" in {
-      val validPaymentSubmission = ValidatedPaymentSubmission(900, "ref", Valid)
-      val payment = sanitise(validPaymentSubmission)
+      val payment = sanitise(validData)
 
-
-      inside(payment) { case Success(SanitisedPaymentSubmission(amount, ref, status)) =>
-        amount should be (900)
-        ref should be ("ref")
-        status should be (Sanitised)
+      inside(payment) {
+        case Right(SanitisedPaymentSubmission(data)) =>
+          data.amount should be (validData.amount)
+          data.reference should be (validData.reference)
       }
     }
 
     "returns an error if the payment is not sanitiser" in {
-      val validPaymentSubmission = ValidatedPaymentSubmission(900, "ref1", Valid)
-      val payment = sanitise(validPaymentSubmission)
-      payment.isFailure should be (true)
-      payment.failure.exception.getMessage should be ("not sanitised payment submission")
-//      inside(payment) { case message =>
-//        message should be ("invalid payment submission")
-//      }
+      val payment = sanitise(invalidData)
+      inside(payment) {
+        case Left(NotSanitisedPaymentSubmission(data)) =>
+          data.amount should be(invalidData.amount)
+          data.reference should be(invalidData.reference)
+      }
     }
   }
 }
