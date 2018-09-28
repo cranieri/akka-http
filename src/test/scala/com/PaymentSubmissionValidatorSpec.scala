@@ -10,7 +10,7 @@ class PaymentSubmissionValidatorSpec extends WordSpec with Matchers with Inside 
     val validData = PaymentSubmissionValue(900, "ref")
     val invalidData = validData.copy(amount = 1000)
     "returns a validated payment if the payment is valid" in {
-      val payment = validate(validData)
+      val payment = validate(SanitisedPaymentSubmission(validData))
 
       inside(payment) {
         case Right(ValidPaymentSubmission(data)) =>
@@ -20,7 +20,7 @@ class PaymentSubmissionValidatorSpec extends WordSpec with Matchers with Inside 
     }
 
     "returns an error if the payment is not valid" in {
-      val payment = validate(invalidData)
+      val payment = validate(SanitisedPaymentSubmission(invalidData))
 
       inside(payment) {
         case Left(InvalidPaymentSubmission(PaymentSubmissionValue(amount, reference, date))) =>

@@ -11,7 +11,7 @@ class PaymentSubmissionSanitiserSpec extends WordSpec with Matchers with Inside 
     val invalidData = validData.copy(reference = "ref1")
 
     "returns a validated payment if the payment is valid" in {
-      val payment = sanitise(validData)
+      val payment = sanitise(UnvalidatedPaymentSubmission(validData))
 
       inside(payment) {
         case Right(SanitisedPaymentSubmission(data)) =>
@@ -21,7 +21,7 @@ class PaymentSubmissionSanitiserSpec extends WordSpec with Matchers with Inside 
     }
 
     "returns an error if the payment is not sanitiser" in {
-      val payment = sanitise(invalidData)
+      val payment = sanitise(UnvalidatedPaymentSubmission(invalidData))
       inside(payment) {
         case Left(NotSanitisedPaymentSubmission(data)) =>
           data.amount should be(invalidData.amount)

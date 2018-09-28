@@ -7,17 +7,20 @@ import scala.util.{Failure, Success, Try}
 
 trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSubmissionValidator {
 
-  private def checkPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission): ServiceResponseType[SanitisedPaymentSubmission] = for {
-    validatedPaymentSubmission <- validate(unvalidatedPaymentSubmission.data)
-    sanitisedPaymentSubmission <- sanitise(validatedPaymentSubmission.data)
-  } yield sanitisedPaymentSubmission
+  private def checkPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission): ServiceResponseType[ValidPaymentSubmission] = for {
+    sanitisedPaymentSubmission <- sanitise(unvalidatedPaymentSubmission)
+    validatedPaymentSubmission <- validate(sanitisedPaymentSubmission)
+  } yield validatedPaymentSubmission
 
   def submitPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission): Try[SubmittedPaymentSubmission] =
     checkPayment(unvalidatedPaymentSubmission) match {
-      case Right(SanitisedPaymentSubmission(value)) =>
+      case Right(ValidPaymentSubmission(value)) =>
         Success(SubmittedPaymentSubmission(value))
       case Left(value) =>
         Failure(new Exception(value.status.toString))
+      case _ =>
+        // log error
+        Failure(new Exception("Internal service error"))
     }
 }
 
