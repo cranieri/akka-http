@@ -6,6 +6,8 @@ scalaVersion := "2.12.6"
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
+scalacOptions += "-Ypartial-unification"
+
 lazy val akkaHttpVersion = "10.1.1"
 lazy val akkaVersion    = "2.5.13"
 
@@ -26,6 +28,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,
       "com.typesafe.akka" %% "akka-stream-testkit"  % akkaVersion     % Test,
       "org.scalatest"     %% "scalatest"            % "3.0.5"         % Test,
-      "org.scalactic" %% "scalactic" % "3.0.5"
+      "org.scalactic" %% "scalactic" % "3.0.5",
+      "org.typelevel" %% "cats-core" % "1.4.0"
     )
   )
