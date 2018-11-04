@@ -16,10 +16,10 @@ trait PaymentSubmissionSanitiser {
     unvalidatedPaymentSubmission match {
     case UnvalidatedPaymentSubmission(paymentSub) if paymentSub.reference == "ref" =>
       println(s"ref: ${paymentSub.reference}")
-      EitherT.right( Future { SanitisedPaymentSubmission(paymentSub) })
+      EitherT.right(Future.successful(SanitisedPaymentSubmission(paymentSub)))
     case UnvalidatedPaymentSubmission(paymentSub)  =>
       val value = PaymentSubmissionValue(paymentSub.amount, paymentSub.reference, Some(LocalDateTime.now()))
-      EitherT.left(Future { NotSanitisedPaymentSubmission(value)}).leftWiden[PaymentSubmissionWithStatus[_ >: PaymentStatus]]
+      EitherT.left(Future.successful(NotSanitisedPaymentSubmission(value))).leftWiden[PaymentSubmissionWithStatus[_ >: PaymentStatus]]
   }
 }
 

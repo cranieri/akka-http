@@ -10,7 +10,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSubmissionValidator {
-  private def checkPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+  def submitPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): Unit =
+    executePaymentSubmissionSteps(unvalidatedPaymentSubmission).value.onComplete({
+      case Success(submittedPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+      case Failure(invalidPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+    })
+
+  private def executePaymentSubmissionSteps(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
     for {
       sanitisedPaymentSubmission <- sanitise(unvalidatedPaymentSubmission)
       validatedPaymentSubmission <- validate(sanitisedPaymentSubmission)
@@ -19,7 +25,7 @@ trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSu
     } yield updatedPaymentSubmission
   }
 
-  def submit(v: ValidPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+  private def submit(v: ValidPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
     if (v.data.amount == 100) EitherT.right(Future {
       SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
     }) else {
@@ -29,7 +35,7 @@ trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSu
     }
   }
 
-  def updatePaymentSubmission(submittedPaymentSubmission: SubmittedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+  private def updatePaymentSubmission(submittedPaymentSubmission: SubmittedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
     if (submittedPaymentSubmission.data.amount == 100) {
       EitherT.right(Future {
         SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
@@ -40,12 +46,6 @@ trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSu
       }).leftWiden[PaymentSubmissionWithStatus[_ >: PaymentStatus]]
     }
   }
-
-  def submitPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): Unit =
-    checkPayment(unvalidatedPaymentSubmission).value.onComplete({
-      case Success(submittedPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
-      case Failure(invalidPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
-    })
 }
 
 object PaymentSubmissionService extends PaymentSubmissionService
