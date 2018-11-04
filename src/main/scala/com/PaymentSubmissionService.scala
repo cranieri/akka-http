@@ -1,30 +1,43 @@
 package com
 
-import akka.http.scaladsl.model.HttpResponse
 import cats.data.EitherT
-import com.model.{PaymentSubmissionValue, ServiceResponseType}
+import com.model.PaymentSubmissionValue
 import com.model.cycles.{ValidPaymentSubmission, _}
+import com.model.statuses.PaymentStatus
+import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSubmissionValidator {
-  import scala.concurrent.ExecutionContext.Implicits.global._
-  import cats.instances.future._
-  private def checkPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, InvalidPaymentSubmission, SubmittedPaymentSubmission] = {
-    val valid = for {
+  private def checkPayment(unvalidatedPaymentSubmission: UnvalidatedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+    for {
       sanitisedPaymentSubmission <- sanitise(unvalidatedPaymentSubmission)
       validatedPaymentSubmission <- validate(sanitisedPaymentSubmission)
-    } yield validatedPaymentSubmission
+      submittedPaymentSubmission <- submit(validatedPaymentSubmission)
+      updatedPaymentSubmission <- updatePaymentSubmission(submittedPaymentSubmission)
+    } yield updatedPaymentSubmission
+  }
 
-    valid match {
-      case Right(v) => for {
-        submittedPaymentSubmission <- submit(v)
-        updatedPaymentSubmission <- updatePaymentSubmission(submittedPaymentSubmission)
-      } yield updatedPaymentSubmission
-      case _ => {
-        EitherT.left(Future {InvalidPaymentSubmission(unvalidatedPaymentSubmission.data)} )
-      }
+  def submit(v: ValidPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+    if (v.data.amount == 100) EitherT.right(Future {
+      SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+    }) else {
+      EitherT.left(Future.successful {
+        InvalidPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+      }).leftWiden[PaymentSubmissionWithStatus[_ >: PaymentStatus]]
+    }
+  }
+
+  def updatePaymentSubmission(submittedPaymentSubmission: SubmittedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, PaymentSubmissionWithStatus[_ >: com.model.statuses.PaymentStatus], SubmittedPaymentSubmission] = {
+    if (submittedPaymentSubmission.data.amount == 100) {
+      EitherT.right(Future {
+        SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+      })
+    } else {
+      EitherT.left(Future.successful {
+        InvalidPaymentSubmission(PaymentSubmissionValue(900, "ref"))
+      }).leftWiden[PaymentSubmissionWithStatus[_ >: PaymentStatus]]
     }
   }
 
@@ -33,29 +46,6 @@ trait PaymentSubmissionService extends PaymentSubmissionSanitiser with PaymentSu
       case Success(submittedPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
       case Failure(invalidPaymentSubmission) => SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref"))
     })
-
-  def submit(v: ValidPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, InvalidPaymentSubmission, SubmittedPaymentSubmission] = {
-    if (v.data.amount == 100) EitherT.right(Future { SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref")) }) else {
-      EitherT.left(Future.successful { InvalidPaymentSubmission(PaymentSubmissionValue(900, "ref")) })
-    }
-  }
-  def updatePaymentSubmission(submittedPaymentSubmission: SubmittedPaymentSubmission)(implicit ec: ExecutionContext): EitherT[Future, InvalidPaymentSubmission, SubmittedPaymentSubmission] = {
-    if (submittedPaymentSubmission.data.amount == 100) EitherT.fromEither(Right(SubmittedPaymentSubmission(PaymentSubmissionValue(900, "ref")))) else EitherT.fromEither(Left(InvalidPaymentSubmission(PaymentSubmissionValue(900, "ref"))))
-  }
-
-
-}
-
-case class User(id: Long, name: String)
-
-// In actual code, probably more than 2 errors
-sealed trait Error
-object Error {
-  final case class UserNotFound(userId: Long) extends Error
-  final case class ConnectionError(message: String) extends Error
-}
-object UserRepo {
-  def followers(userId: Long): Either[Error, List[User]] = ???
 }
 
 object PaymentSubmissionService extends PaymentSubmissionService
